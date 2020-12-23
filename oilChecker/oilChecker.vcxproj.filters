@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\rpi">
+      <UniqueIdentifier>{a3e2ca89-3351-43d6-94a9-79b38d728d16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utilities">
+      <UniqueIdentifier>{70436b1f-1b17-4bf1-9780-5142e5987229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\email">
+      <UniqueIdentifier>{fb7b5556-46f1-430d-97cb-a63ee17afa18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\email">
+      <UniqueIdentifier>{33c68acf-4f17-404f-b0f4-0ea9e1bb7746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utilities">
+      <UniqueIdentifier>{266a7a31-1d48-485e-9ed7-5d808856c20a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rpi">
+      <UniqueIdentifier>{830d5252-003b-47ee-b05a-a35aa3dc6fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\email\cJSON">
+      <UniqueIdentifier>{07ce1512-2c2b-43ac-8a28-66ec68c1d000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\email\cJSON">
+      <UniqueIdentifier>{ea1011ca-deac-4cf9-aec3-712cc9fa188e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\logging">
+      <UniqueIdentifier>{097eb0ca-4417-4633-8c64-5928103d40f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\logging">
+      <UniqueIdentifier>{3367117e-f0a2-4719-a401-6836e102ec26}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\oilChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\oilCheckerApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tankGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\cJSON\cJSON.c">
+      <Filter>Source Files\email\cJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\cJSON\cJSON_Utils.c">
+      <Filter>Source Files\email\cJSON</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\curlUtilities.cpp">
+      <Filter>Source Files\email</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\emailSender.cpp">
+      <Filter>Source Files\email</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\jsonInterface.cpp">
+      <Filter>Source Files\email</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\email\oAuth2Interface.cpp">
+      <Filter>Source Files\email</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\ds18b20Sensor.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\gpio.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\interrupt.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\pwmOutput.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\timingUtility.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rpi\twi.cpp">
+      <Filter>Source Files\rpi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utilities\configFile.cpp">
+      <Filter>Source Files\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utilities\uString.cpp">
+      <Filter>Source Files\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\oilCheckerConfigFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\logging\logger.cpp">
+      <Filter>Source Files\logging</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\oilChecker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\oilCheckerApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\oilCheckerConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tankGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\curlUtilities.h">
+      <Filter>Header Files\email</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\emailSender.h">
+      <Filter>Header Files\email</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\jsonInterface.h">
+      <Filter>Header Files\email</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\oAuth2Interface.h">
+      <Filter>Header Files\email</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\cJSON\cJSON.h">
+      <Filter>Header Files\email\cJSON</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\email\cJSON\cJSON_Utils.h">
+      <Filter>Header Files\email\cJSON</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\ds18b20Sensor.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\gpio.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\interrupt.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\pwmOutput.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\temperatureSensor.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\timingUtility.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rpi\twi.h">
+      <Filter>Header Files\rpi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\utilities\configFile.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\utilities\uString.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\oilCheckerConfigFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\logging\logger.h">
+      <Filter>Header Files\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\logging\combinedLogger.h">
+      <Filter>Header Files\logging</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

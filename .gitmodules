@@ -1,0 +1,12 @@
+[submodule "src/rpi"]
+	path = src/rpi
+	url = ssh://git@github.com/KerryL/rpi.git
+[submodule "src/utilities"]
+	path = src/utilities
+	url = ssh://git@github.com/KerryL/utilities.git
+[submodule "src/email"]
+	path = src/email
+	url = ssh://git@github.com/KerryL/email.git
+[submodule "src/logging"]
+	path = src/logging
+	url = ssh://git@github.com/KerryL/logging.git
