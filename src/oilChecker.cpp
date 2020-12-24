@@ -129,41 +129,47 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 {
 	log << "Reading distance sensor" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::GetTemperature(double& temperature) const
 {
 	log << "Reading temperature sensor" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::SendSummaryEmail() const
 {
 	log << "Sending summary email" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::SendLowOilLevelEmail() const
 {
 	log << "Sending low level warning email" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::SendNewLogFileEmail() const
 {
 	log << "Sending log file complete email" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::WriteOilLogData(const VolumeDistance& values) const
 {
 	log << "Adding oil data to log" << std::endl;
 	// TODO
+	return false;
 }
 
 bool OilChecker::WriteTemperatureLogData(const double& temperature) const
 {
 	log << "Adding temperature data to log" << std::endl;
 	// TODO
+	return false;
 }
-

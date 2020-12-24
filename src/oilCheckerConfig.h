@@ -29,6 +29,8 @@ struct OilCheckerConfig
 	unsigned int summaryEmailPeriod = 7;// [days]
 	unsigned int logFileRestartPeriod = 365;// [days]
 
+	std::string emailSender;
+	std::string stmpUrl;
 	std::vector<std::string> emailRecipients;
 	std::string logFilePath;
 };

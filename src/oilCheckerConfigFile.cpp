@@ -24,6 +24,8 @@ void OilCheckerConfigFile::BuildConfigItems()
 	AddConfigItem(_T("SUMMARY_PERIOD"), config.summaryEmailPeriod);
 	AddConfigItem(_T("NEW_LOG_PERIOD"), config.logFileRestartPeriod);
 
+	AddConfigItem(_T("EMAIL_SENDER"), config.emailRecipients);
+	AddConfigItem(_T("STMP_URL"), config.stmpUrl);
 	AddConfigItem(_T("EMAIL"), config.emailRecipients);
 	AddConfigItem(_T("LOG_PATH"), config.logFilePath);
 }
@@ -67,6 +69,18 @@ bool OilCheckerConfigFile::ConfigIsOK()
 		ok = false;
 	}
 
+	if (config.stmpUrl.empty())
+	{
+		outStream << GetKey(config.stmpUrl) << " must be specified" << std::endl;
+		ok = false;
+	}
+	
+	if (config.emailSender.empty())
+	{
+		outStream << GetKey(config.emailSender) << " must be specified" << std::endl;
+		ok = false;
+	}
+	
 	if (config.emailRecipients.empty())
 	{
 		outStream << "At least one " << GetKey(config.emailRecipients) << " must be specified" << std::endl;

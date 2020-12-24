@@ -8,6 +8,7 @@
 
 // Local headers
 #include "oilCheckerConfig.h"
+#include "utilities/uString.h"
 
 // Standard C++ headers
 #include <thread>
