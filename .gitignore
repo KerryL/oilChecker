@@ -18,6 +18,7 @@ ipch/
 !res/*.rc
 
 *.config
+.oilCheckerOAuth
 
 # Ignore GKT directories
 bin/

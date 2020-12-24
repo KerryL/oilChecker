@@ -8,7 +8,7 @@
 # be added automatically
 INCDIRS_TEMP = \
 	$(CURDIR)/src \
-	$(RPI)/include
+	$(CURDIR)/src/utilities
 
 INCDIRS = $(addprefix -I,$(INCDIRS_TEMP))
 
@@ -45,7 +45,7 @@ AR = ar rcs
 RANLIB = ranlib
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -std=c++17  $(INCDIRS) `pkg-config --cflags libcurl openssl`
+CFLAGS = -Wall -Wextra -Wno-psabi -std=c++17  $(INCDIRS) `pkg-config --cflags libcurl openssl`
 CFLAGS_RELEASE = $(CFLAGS) -O2
 CFLAGS_DEBUG = $(CFLAGS) -g
 

@@ -18,6 +18,22 @@ struct TankDimensions
 	double heightOffset = 0.0;// [in]
 };
 
+struct EmailConfig
+{
+	std::string sender;
+	std::vector<std::string> recipients;
+	
+	std::string stmpUrl;
+	std::string oAuth2TokenURL;
+	std::string oAuth2DeviceTokenURL;
+	std::string oAuth2AuthenticationURL;
+	std::string oAuth2DeviceAuthenticationURL;
+	std::string oAuth2ClientID;
+	std::string oAuth2ClientSecret;
+	std::string redirectURI;
+	std::string caCertificatePath;
+};
+
 struct OilCheckerConfig
 {
 	double lowLevelThreshold = -1.0;// [gal]
@@ -29,10 +45,7 @@ struct OilCheckerConfig
 	unsigned int summaryEmailPeriod = 7;// [days]
 	unsigned int logFileRestartPeriod = 365;// [days]
 
-	std::string emailSender;
-	std::string stmpUrl;
-	std::vector<std::string> emailRecipients;
-	std::string logFilePath;
+	EmailConfig email;
 };
 
 #endif// OIL_CHECKER_CONFIG_H_
