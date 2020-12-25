@@ -25,7 +25,7 @@ int OilCheckerApp::Run(int argc, char* argv[])
 		return 1;
 	}
 
-	const std::string logFileName("oilChecker.log");
+	const std::string logFileName("oilChecker.log");// TODO:  Time-stamp the log so we don't overwrite
 	UString::OFStream logFile(logFileName);
 	if (!logFile.is_open())
 	{
@@ -77,7 +77,7 @@ bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStr
 	OAuth2Interface::Get().SetTokenURL(email.oAuth2DeviceTokenURL);
 	OAuth2Interface::Get().SetAuthenticationURL(email.oAuth2DeviceAuthenticationURL);
 	OAuth2Interface::Get().SetGrantType("http://oauth.net/grant_type/device/1.0");
-	OAuth2Interface::Get().SetScope("email");
+	OAuth2Interface::Get().SetScope("https://www.googleapis.com/auth/gmail.compose");
 #endif
 
 	// Set the refresh token (one will be created, if this is the first login)

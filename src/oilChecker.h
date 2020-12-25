@@ -9,6 +9,7 @@
 // Local headers
 #include "oilCheckerConfig.h"
 #include "utilities/uString.h"
+#include "email/emailSender.h"
 
 // Standard C++ headers
 #include <thread>
@@ -55,7 +56,7 @@ private:
 	bool GetRemainingOilVolume(VolumeDistance& values) const;
 	bool GetTemperature(double& temperature) const;
 	bool SendSummaryEmail() const;
-	bool SendLowOilLevelEmail() const;
+	bool SendLowOilLevelEmail(const double& volumeRemaining) const;
 	bool SendNewLogFileEmail() const;
 
 	bool WriteOilLogData(const VolumeDistance& values) const;
@@ -77,7 +78,7 @@ private:
 	std::vector<TemperatureDataPoint> temperatureData;
 	std::vector<OilDataPoint> oilData;
 
-	// TODO:  Event log file for errors, etc
+	void BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const;
 };
 
 #endif// OIL_CHECKER_H_

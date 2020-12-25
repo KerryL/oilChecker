@@ -5,6 +5,8 @@
 
 // Local headers
 #include "oilChecker.h"
+#include "rpi/ds18b20Sensor.h"
+#include "email/oAuth2Interface.h"
 
 OilChecker::~OilChecker()
 {
@@ -54,7 +56,7 @@ void OilChecker::OilMeasurementThreadEntry()
 			if (values.volume < config.lowLevelThreshold)
 			{
 				log << "Low oil level detected!" << std::endl;
-				if (!SendLowOilLevelEmail())
+				if (!SendLowOilLevelEmail(values.volume))
 					log << "Failed to send low oil warning email" << std::endl;
 			}
 
@@ -128,15 +130,35 @@ void OilChecker::SummaryUpdateThreadEntry()
 bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 {
 	log << "Reading distance sensor" << std::endl;
+	values.volume = 20.0;
 	// TODO
-	return false;
+	return true;
 }
 
 bool OilChecker::GetTemperature(double& temperature) const
 {
-	log << "Reading temperature sensor" << std::endl;
-	// TODO
-	return false;
+	// We do this in a "lazy" way:
+	// 1. Check to see if any sensors are connected
+	// 2. If exactly one sensor is connected, continue and use this sensor
+	// 3. Else, return an error
+	
+	log << "Checking for connected temperature sensors..." << std::endl;
+	auto connectedSensors(DS18B20::GetConnectedSensors());
+	if (connectedSensors.size() != 1)
+	{
+		log << "Found " << connectedSensors.size() << " sensor(s), expected 1" << std::endl;
+		return false;
+	}
+	
+	log << "Reading temperature from sensor " << connectedSensors.front() << std::endl;
+	DS18B20 tempSensor(connectedSensors.front(), log);
+	if (!tempSensor.GetTemperature(temperature))
+		return false;
+		
+	temperature = temperature * 1.8 + 32.0;// Convert C to deg F
+	log << "Measured temperature of " << temperature << " deg F" << std::endl;
+
+	return true;
 }
 
 bool OilChecker::SendSummaryEmail() const
@@ -146,11 +168,22 @@ bool OilChecker::SendSummaryEmail() const
 	return false;
 }
 
-bool OilChecker::SendLowOilLevelEmail() const
+bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 {
-	log << "Sending low level warning email" << std::endl;
-	// TODO
-	return false;
+	log << "Sending low-level warning email" << std::endl;
+	UString::OStringStream ss;
+	ss << "Only " << volumeRemaining << " gal of oil remains in the tank, which is less than the threshold of "
+		<< config.lowLevelThreshold << " gal.";
+	
+	EmailSender::LoginInfo loginInfo;
+	std::vector<EmailSender::AddressInfo> recipients;
+	BuildEmailEssentials(loginInfo, recipients);
+	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, true, log);
+	if (!sender.Send())
+		return false;
+
+	log << "Successfully sent low-level warning email" << std::endl;
+	return true;
 }
 
 bool OilChecker::SendNewLogFileEmail() const
@@ -172,4 +205,20 @@ bool OilChecker::WriteTemperatureLogData(const double& temperature) const
 	log << "Adding temperature data to log" << std::endl;
 	// TODO
 	return false;
+}
+
+void OilChecker::BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const
+{
+	loginInfo.smtpUrl = config.email.stmpUrl;
+	loginInfo.localEmail = config.email.sender;
+	loginInfo.oAuth2Token = OAuth2Interface::Get().GetRefreshToken();
+	loginInfo.useSSL = true;
+	loginInfo.caCertificatePath = config.email.caCertificatePath;
+
+	recipients.resize(config.email.recipients.size());
+	for (unsigned int i = 0; i < recipients.size(); ++i)
+	{
+		recipients[i].address = config.email.recipients[i];
+		recipients[i].displayName = config.email.recipients[i];
+	}
 }
