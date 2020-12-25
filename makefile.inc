@@ -50,7 +50,7 @@ CFLAGS_RELEASE = $(CFLAGS) -O2
 CFLAGS_DEBUG = $(CFLAGS) -g
 
 # Linker flags
-LDFLAGS = $(LIBDIRS) $(LIBS) `pkg-config --libs libcurl openssl` -pthread
+LDFLAGS = $(LIBDIRS) $(LIBS) `pkg-config --libs libcurl openssl` -pthread -lstdc++fs
 LDFLAGS_DEBUG = $(LDFLAGS)
 LDFLAGS_RELEASE = $(LDFLAGS)
 

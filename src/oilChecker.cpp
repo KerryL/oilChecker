@@ -8,6 +8,13 @@
 #include "rpi/ds18b20Sensor.h"
 #include "email/oAuth2Interface.h"
 
+// Standard C++ headers
+#include <filesystem>
+#include <iomanip>
+
+const std::string OilChecker::oilLogFileName("oilHistory.csv");
+const std::string OilChecker::temperatureLogFileName("temperatureHistory.csv");
+
 OilChecker::~OilChecker()
 {
 	stopThreads = true;
@@ -60,9 +67,14 @@ void OilChecker::OilMeasurementThreadEntry()
 					log << "Failed to send low oil warning email" << std::endl;
 			}
 
-			oilData.push_back(OilDataPoint(std::chrono::steady_clock::now(), values));
+			oilData.push_back(OilDataPoint(std::chrono::system_clock::now(), values));
 
-			// TODO:  If it's time to start new log file, email log file
+			if (false)// TODO:  When is it time to start a new log?  Don't want to assume application is running the entire time, right?
+			{
+				std::string newFileName(oilLogFileName + '_' + GetTimestamp());
+				std::filesystem::rename(oilLogFileName, newFileName);
+				SendNewLogFileEmail(newFileName);
+			}
 		}
 
 		std::unique_lock<std::mutex> lock(stopMutex);
@@ -92,9 +104,14 @@ void OilChecker::TemperatureMeasurementThreadEntry()
 			if (!WriteTemperatureLogData(temperature))
 				log << "Failed to log temperature data (T = " << temperature << " deg F)" << std::endl;
 
-			temperatureData.push_back(TemperatureDataPoint(std::chrono::steady_clock::now(), temperature));
+			temperatureData.push_back(TemperatureDataPoint(std::chrono::system_clock::now(), temperature));
 
-			// TODO:  If it's time to start new log file, email log file
+			if (false)// TODO:  When is it time to start a new log?  Don't want to assume application is running the entire time, right?
+			{
+				std::string newFileName(temperatureLogFileName + '_' + GetTimestamp());
+				std::filesystem::rename(temperatureLogFileName, newFileName);
+				SendNewLogFileEmail(newFileName);
+			}
 		}
 
 		std::unique_lock<std::mutex> lock(stopMutex);
@@ -164,8 +181,41 @@ bool OilChecker::GetTemperature(double& temperature) const
 bool OilChecker::SendSummaryEmail() const
 {
 	log << "Sending summary email" << std::endl;
-	// TODO
-	return false;
+	UString::OStringStream ss;
+	ss << "Summary for oil level and outside temperature for the last " << config.summaryEmailPeriod << " days:\n\n"
+		<< "Date/Time         Temperature (deg F)  Remaining Oil (gal)\n";
+	// Column widths are 16, 19, and 19 with two spaces between each column
+		
+	unsigned int oilI(0), tempI(0);
+	while (oilI < oilData.size() || tempI < temperatureData.size())
+	{
+		if (oilI >= oilData.size() || temperatureData[tempI].t < oilData[oilI].t)
+		{
+			ss << GetTimestamp(temperatureData[tempI].t) <<std::string(19 + 2 + 2, ' ') << std::setfill(' ') << std::setw(19) << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << '\n';
+			++tempI;
+		}
+		else if (tempI >= temperatureData.size() || oilData[oilI].t < temperatureData[tempI].t)
+		{
+			ss << GetTimestamp(oilData[oilI].t) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(oilData[oilI].v.volume + 0.5) << '\n';
+			++oilI;
+		}
+		else
+		{
+			ss << GetTimestamp(oilData[oilI].t) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(oilData[oilI].v.volume + 0.5) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(temperatureData[tempI].v + 0.5) << '\n';
+			++oilI;
+			++tempI;
+		}
+	}
+	
+	EmailSender::LoginInfo loginInfo;
+	std::vector<EmailSender::AddressInfo> recipients;
+	BuildEmailEssentials(loginInfo, recipients);
+	EmailSender sender("Oil Level Summary", ss.str(), std::string(), recipients, loginInfo, true, true, log);
+	if (!sender.Send())
+		return false;
+
+	log << "Successfully sent summary email" << std::endl;
+	return true;
 }
 
 bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
@@ -186,9 +236,9 @@ bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 	return true;
 }
 
-bool OilChecker::SendNewLogFileEmail() const
+bool OilChecker::SendNewLogFileEmail(const std::string& oldLogFileName) const
 {
-	log << "Sending log file complete email" << std::endl;
+	log << "Sending log file complete email for '" << oldLogFileName << "'" << std::endl;
 	// TODO
 	return false;
 }
@@ -196,15 +246,37 @@ bool OilChecker::SendNewLogFileEmail() const
 bool OilChecker::WriteOilLogData(const VolumeDistance& values) const
 {
 	log << "Adding oil data to log" << std::endl;
-	// TODO
-	return false;
+	const bool needsHeader(!std::filesystem::exists(oilLogFileName));
+	std::ofstream file(oilLogFileName, std::ios::app);
+	if (!file.is_open())
+	{
+		log << "Failed to open '" << oilLogFileName << "' for output" << std::endl;
+		return false;
+	}
+	
+	if (needsHeader)
+		file << "Time,Distance (in),Volume (gal)\n";
+	
+	file << GetTimestamp() << ',' << values.distance << ',' << values.volume << '\n';
+	return true;
 }
 
 bool OilChecker::WriteTemperatureLogData(const double& temperature) const
 {
 	log << "Adding temperature data to log" << std::endl;
-	// TODO
-	return false;
+	const bool needsHeader(!std::filesystem::exists(temperatureLogFileName));
+	std::ofstream file(temperatureLogFileName, std::ios::app);
+	if (!file.is_open())
+	{
+		log << "Failed to open '" << temperatureLogFileName << "' for output" << std::endl;
+		return false;
+	}
+	
+	if (needsHeader)
+		file << "Time,Temperature (deg F)\n";
+	
+	file << GetTimestamp() << ',' << temperature << '\n';
+	return true;
 }
 
 void OilChecker::BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const
@@ -221,4 +293,20 @@ void OilChecker::BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::ve
 		recipients[i].address = config.email.recipients[i];
 		recipients[i].displayName = config.email.recipients[i];
 	}
+}
+
+std::string OilChecker::GetTimestamp()
+{
+	auto now(std::chrono::system_clock::now());
+	return GetTimestamp(now);
+}
+
+std::string OilChecker::GetTimestamp(const std::chrono::system_clock::time_point& now)
+{
+	std::time_t now_c(std::chrono::system_clock::to_time_t(now));
+	const std::tm now_tm(*std::localtime(&now_c));
+	const size_t timeSize(16);
+	char timeString[timeSize];
+	strftime(timeString, timeSize, "Y-m-d_H:M", &now_tm);
+	return std::string(timeString, timeSize);
 }

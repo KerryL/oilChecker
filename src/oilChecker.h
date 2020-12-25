@@ -27,6 +27,9 @@ public:
 	void Run();
 
 private:
+	static const std::string oilLogFileName;
+	static const std::string temperatureLogFileName;
+	
 	OilCheckerConfig config;
 	UString::OStream& log;
 
@@ -57,7 +60,7 @@ private:
 	bool GetTemperature(double& temperature) const;
 	bool SendSummaryEmail() const;
 	bool SendLowOilLevelEmail(const double& volumeRemaining) const;
-	bool SendNewLogFileEmail() const;
+	bool SendNewLogFileEmail(const std::string& oldLogFileName) const;
 
 	bool WriteOilLogData(const VolumeDistance& values) const;
 	bool WriteTemperatureLogData(const double& temperature) const;
@@ -66,9 +69,9 @@ private:
 	struct DataPoint
 	{
 		DataPoint() = default;
-		DataPoint(const std::chrono::steady_clock::time_point& t, T& v) : t(t), v(v) {}
+		DataPoint(const std::chrono::system_clock::time_point& t, T& v) : t(t), v(v) {}
 
-		std::chrono::steady_clock::time_point t;
+		std::chrono::system_clock::time_point t;
 		T v;
 	};
 
@@ -79,6 +82,9 @@ private:
 	std::vector<OilDataPoint> oilData;
 
 	void BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const;
+	
+	static std::string GetTimestamp();
+	static std::string GetTimestamp(const std::chrono::system_clock::time_point& now);
 };
 
 #endif// OIL_CHECKER_H_
