@@ -224,7 +224,7 @@ bool OilChecker::SendSummaryEmail() const
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
-	EmailSender sender("Oil Level Summary", ss.str(), std::string(), recipients, loginInfo, true, true, log);
+	EmailSender sender("Oil Level Summary", ss.str(), std::string(), recipients, loginInfo, true, false, log);
 	if (!sender.Send())
 		return false;
 
@@ -242,7 +242,7 @@ bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
-	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, true, log);
+	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, true, log);// TODO:  Change test mode to false!
 	if (!sender.Send())
 		return false;
 
@@ -253,8 +253,18 @@ bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 bool OilChecker::SendNewLogFileEmail(const std::string& oldLogFileName) const
 {
 	log << "Sending log file complete email for '" << oldLogFileName << "'" << std::endl;
-	// TODO
-	return false;
+	UString::OStringStream ss;
+	ss << "Log file '" << oldLogFileName << "' reached maximum duration of " << config.logFileRestartPeriod << " days.  The old log file has been stored.  It is attached here for reference.";
+
+	EmailSender::LoginInfo loginInfo;
+	std::vector<EmailSender::AddressInfo> recipients;
+	BuildEmailEssentials(loginInfo, recipients);
+	EmailSender sender("Log File Reached Maximum Duration", ss.str(), oldLogFileName, recipients, loginInfo, true, false, log);
+	if (!sender.Send())
+		return false;
+
+	log << "Successfully sent log file complete email" << std::endl;
+	return true;
 }
 
 bool OilChecker::WriteOilLogData(const VolumeDistance& values) const
