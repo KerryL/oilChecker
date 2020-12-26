@@ -14,6 +14,8 @@
 
 const std::string OilChecker::oilLogFileName("oilHistory.csv");
 const std::string OilChecker::temperatureLogFileName("temperatureHistory.csv");
+const std::string OilChecker::oilLogCreatedDateFileName(".oilLogCreatedDate");
+const std::string OilChecker::temperatureLogCreatedDateFileName(".temperatureLogCreatedDate");
 
 OilChecker::~OilChecker()
 {
@@ -30,6 +32,14 @@ OilChecker::~OilChecker()
 
 void OilChecker::Run()
 {
+	if (!std::filesystem::exists(oilLogCreatedDateFileName))
+		WriteLogCreatedDate(oilLogCreatedDateFileName, log);
+	if (!std::filesystem::exists(temperatureLogCreatedDateFileName))
+		WriteLogCreatedDate(temperatureLogCreatedDateFileName, log);
+
+	oilLogCreatedDate = ReadLogCreatedDate(oilLogCreatedDateFileName, log);
+	temperatureLogCreatedDate = ReadLogCreatedDate(temperatureLogCreatedDateFileName, log);
+	
 	oilMeasurementThread = std::thread(&OilChecker::OilMeasurementThreadEntry, this);
 	temperatureMeasurementThread = std::thread(&OilChecker::TemperatureMeasurementThreadEntry, this);
 	summaryUpdateThread = std::thread(&OilChecker::SummaryUpdateThreadEntry, this);
@@ -69,11 +79,13 @@ void OilChecker::OilMeasurementThreadEntry()
 
 			oilData.push_back(OilDataPoint(std::chrono::system_clock::now(), values));
 
-			if (false)// TODO:  When is it time to start a new log?  Don't want to assume application is running the entire time, right?
+			if (std::chrono::system_clock::now() > oilLogCreatedDate + std::chrono::minutes(config.logFileRestartPeriod * 24 * 60))
 			{
 				std::string newFileName(oilLogFileName + '_' + GetTimestamp());
 				std::filesystem::rename(oilLogFileName, newFileName);
 				SendNewLogFileEmail(newFileName);
+				WriteLogCreatedDate(oilLogCreatedDateFileName, log);
+				oilLogCreatedDate = ReadLogCreatedDate(oilLogCreatedDateFileName, log);
 			}
 		}
 
@@ -106,11 +118,13 @@ void OilChecker::TemperatureMeasurementThreadEntry()
 
 			temperatureData.push_back(TemperatureDataPoint(std::chrono::system_clock::now(), temperature));
 
-			if (false)// TODO:  When is it time to start a new log?  Don't want to assume application is running the entire time, right?
+			if (std::chrono::system_clock::now() > temperatureLogCreatedDate + std::chrono::minutes(config.logFileRestartPeriod * 24 * 60))
 			{
 				std::string newFileName(temperatureLogFileName + '_' + GetTimestamp());
 				std::filesystem::rename(temperatureLogFileName, newFileName);
 				SendNewLogFileEmail(newFileName);
+				WriteLogCreatedDate(temperatureLogCreatedDateFileName, log);
+				temperatureLogCreatedDate = ReadLogCreatedDate(temperatureLogCreatedDateFileName, log);
 			}
 		}
 
@@ -309,4 +323,42 @@ std::string OilChecker::GetTimestamp(const std::chrono::system_clock::time_point
 	char timeString[timeSize];
 	strftime(timeString, timeSize, "%Y-%m-%d_%H:%M", &now_tm);
 	return std::string(timeString, timeSize - 1);
+}
+
+std::chrono::system_clock::time_point OilChecker::ReadLogCreatedDate(const std::string& fileName, UString::OStream& log)
+{
+	std::ifstream file(fileName);
+	if (!file.is_open())
+	{
+		log << "Failed to open '" << fileName << "' for input" << std::endl;
+		return std::chrono::system_clock::now();
+	}
+	
+	std::string timeString;
+	file >> timeString;
+
+	std::tm tm{};
+	strptime(timeString.c_str(), "%Y-%m-%d_%H:%M", &tm);
+	
+	// Note the result of this conversion can be off by one hour due to daylight savings time.
+	// I haven't found a way to say "just interpret this string as the time in the local time
+	// zone" and have it give the expected results.  I can change the time zone before making
+	// the conversion, which will work if I print the time then, but when I reset the time
+	// zone (to avoid screwing up the other time_points used in this program), it breaks the
+	// time read here again.  So we're going to live with it being off by an hour (maybe) for
+	// now (TODO).
+	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+}
+
+bool OilChecker::WriteLogCreatedDate(const std::string& fileName, UString::OStream& log)
+{
+	std::ofstream file(fileName);
+	if (!file.is_open())
+	{
+		log << "Failed to open '" << fileName << "' for output" << std::endl;
+		return false;
+	}
+	
+	file << GetTimestamp();
+	return true;
 }

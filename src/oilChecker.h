@@ -29,9 +29,14 @@ public:
 private:
 	static const std::string oilLogFileName;
 	static const std::string temperatureLogFileName;
+	static const std::string oilLogCreatedDateFileName;
+	static const std::string temperatureLogCreatedDateFileName;
 	
 	OilCheckerConfig config;
 	UString::OStream& log;
+	
+	std::chrono::system_clock::time_point oilLogCreatedDate;
+	std::chrono::system_clock::time_point temperatureLogCreatedDate;
 
 	std::thread oilMeasurementThread;
 	std::thread temperatureMeasurementThread;
@@ -85,6 +90,8 @@ private:
 	
 	static std::string GetTimestamp();
 	static std::string GetTimestamp(const std::chrono::system_clock::time_point& now);
+	static std::chrono::system_clock::time_point ReadLogCreatedDate(const std::string& fileName, UString::OStream& log);
+	static bool WriteLogCreatedDate(const std::string& fileName, UString::OStream& log);
 };
 
 #endif// OIL_CHECKER_H_
