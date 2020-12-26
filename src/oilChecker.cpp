@@ -281,7 +281,7 @@ bool OilChecker::WriteTemperatureLogData(const double& temperature) const
 
 void OilChecker::BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const
 {
-	loginInfo.smtpUrl = config.email.stmpUrl;
+	loginInfo.smtpUrl = "smtp.gmail.com:587";
 	loginInfo.localEmail = config.email.sender;
 	loginInfo.oAuth2Token = OAuth2Interface::Get().GetRefreshToken();
 	loginInfo.useSSL = true;
@@ -305,8 +305,8 @@ std::string OilChecker::GetTimestamp(const std::chrono::system_clock::time_point
 {
 	std::time_t now_c(std::chrono::system_clock::to_time_t(now));
 	const std::tm now_tm(*std::localtime(&now_c));
-	const size_t timeSize(16);
+	const size_t timeSize(17);
 	char timeString[timeSize];
-	strftime(timeString, timeSize, "Y-m-d_H:M", &now_tm);
-	return std::string(timeString, timeSize);
+	strftime(timeString, timeSize, "%Y-%m-%d_%H:%M", &now_tm);
+	return std::string(timeString, timeSize - 1);
 }
