@@ -22,15 +22,9 @@ struct EmailConfig
 {
 	std::string sender;
 	std::vector<std::string> recipients;
-	
-	std::string stmpUrl;
-	std::string oAuth2TokenURL;
-	std::string oAuth2DeviceTokenURL;
-	std::string oAuth2AuthenticationURL;
-	std::string oAuth2DeviceAuthenticationURL;
+
 	std::string oAuth2ClientID;
 	std::string oAuth2ClientSecret;
-	std::string redirectURI;
 	std::string caCertificatePath;
 };
 

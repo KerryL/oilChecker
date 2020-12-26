@@ -26,15 +26,9 @@ void OilCheckerConfigFile::BuildConfigItems()
 
 	AddConfigItem(_T("EMAIL_SENDER"), config.email.sender);
 	AddConfigItem(_T("EMAIL"), config.email.recipients);
-	
-	AddConfigItem(_T("STMP_URL"), config.email.stmpUrl);
-	AddConfigItem(_T("OAUTH2_TOKEN_URL"), config.email.oAuth2TokenURL);
-	AddConfigItem(_T("OAUTH2_DEVICE_TOKEN_URL"), config.email.oAuth2DeviceTokenURL);
-	AddConfigItem(_T("OAUTH2_AUTH_URL"), config.email.oAuth2AuthenticationURL);
-	AddConfigItem(_T("OAUTH2_AUTH_DEVICE_URL"), config.email.oAuth2DeviceAuthenticationURL);
+
 	AddConfigItem(_T("OATH2_CLIENT_ID"), config.email.oAuth2ClientID);
 	AddConfigItem(_T("OATH2_CLIENT_SECRET"), config.email.oAuth2ClientSecret);
-	AddConfigItem(_T("OAUTH2_REDIRECT_URI"), config.email.redirectURI);
 }
 
 void OilCheckerConfigFile::AssignDefaults()
@@ -75,36 +69,6 @@ bool OilCheckerConfigFile::ConfigIsOK()
 		outStream << GetKey(config.oilMeasurementPeriod) << " must be strictly positive" << std::endl;
 		ok = false;
 	}
-
-	if (config.email.stmpUrl.empty())
-	{
-		outStream << GetKey(config.email.stmpUrl) << " must be specified" << std::endl;
-		ok = false;
-	}
-	
-	if (config.email.oAuth2TokenURL.empty())
-	{
-		outStream << GetKey(config.email.oAuth2TokenURL) << " must be specified" << std::endl;
-		ok = false;
-	}
-	
-	if (config.email.oAuth2DeviceTokenURL.empty())
-	{
-		outStream << GetKey(config.email.oAuth2DeviceTokenURL) << " must be specified" << std::endl;
-		ok = false;
-	}
-	
-	if (config.email.oAuth2AuthenticationURL.empty())
-	{
-		outStream << GetKey(config.email.oAuth2AuthenticationURL) << " must be specified" << std::endl;
-		ok = false;
-	}
-	
-	if (config.email.oAuth2DeviceAuthenticationURL.empty())
-	{
-		outStream << GetKey(config.email.oAuth2DeviceAuthenticationURL) << " must be specified" << std::endl;
-		ok = false;
-	}
 	
 	if (config.email.oAuth2ClientID.empty())
 	{
@@ -115,12 +79,6 @@ bool OilCheckerConfigFile::ConfigIsOK()
 	if (config.email.oAuth2ClientSecret.empty())
 	{
 		outStream << GetKey(config.email.oAuth2ClientSecret) << " must be specified" << std::endl;
-		ok = false;
-	}
-	
-	if (config.email.redirectURI.empty())
-	{
-		outStream << GetKey(config.email.redirectURI) << " must be specified" << std::endl;
 		ok = false;
 	}
 

@@ -65,19 +65,21 @@ bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStr
 
 	// Originally, this was for windows only, but device access does not
 	// support full access to e-mail.  So the user has some typing to do...
-#if 1//#ifdef _WIN32
-	OAuth2Interface::Get().SetTokenURL(email.oAuth2TokenURL);
-	OAuth2Interface::Get().SetAuthenticationURL(email.oAuth2AuthenticationURL);
-	OAuth2Interface::Get().SetResponseType("code");
-	OAuth2Interface::Get().SetRedirectURI(email.redirectURI);
+#if 0//#ifdef _WIN32
+	OAuth2Interface::Get().SetTokenURL(_T("https://accounts.google.com/o/oauth2/token"));
+	OAuth2Interface::Get().SetAuthenticationURL(_T("https://accounts.google.com/o/oauth2/auth"));
+	OAuth2Interface::Get().SetResponseType(_T("code"));
+	OAuth2Interface::Get().SetRedirectURI(_T("urn:ietf:wg:oauth:2.0:oob"));
 	OAuth2Interface::Get().SetLoginHint(email.sender);
-	OAuth2Interface::Get().SetGrantType("authorization_code");
-	OAuth2Interface::Get().SetScope("https://mail.google.com/");
+	OAuth2Interface::Get().SetGrantType(_T("authorization_code"));
+	OAuth2Interface::Get().SetScope(_T("https://www.googleapis.com/auth/gmail.send");
 #else
-	OAuth2Interface::Get().SetTokenURL(email.oAuth2DeviceTokenURL);
-	OAuth2Interface::Get().SetAuthenticationURL(email.oAuth2DeviceAuthenticationURL);
-	OAuth2Interface::Get().SetGrantType("http://oauth.net/grant_type/device/1.0");
-	OAuth2Interface::Get().SetScope("https://www.googleapis.com/auth/gmail.send");
+	OAuth2Interface::Get().SetTokenURL(_T("https://www.googleapis.com/oauth2/v3/token"));
+	OAuth2Interface::Get().SetAuthenticationURL(_T("https://accounts.google.com/o/oauth2/device/code"));
+	OAuth2Interface::Get().SetAuthenticationPollURL(_T("https://oauth2.googleapis.com/token"));
+	OAuth2Interface::Get().SetGrantType(_T("http://oauth.net/grant_type/device/1.0"));
+	OAuth2Interface::Get().SetPollGrantType(_T("urn:ietf:params:oauth:grant-type:device_code"));
+	OAuth2Interface::Get().SetScope(_T("email"));
 #endif
 
 	// Set the refresh token (one will be created, if this is the first login)
