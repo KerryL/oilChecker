@@ -47,7 +47,7 @@ void OilChecker::Run()
 	summaryUpdateThread = std::thread(&OilChecker::SummaryUpdateThreadEntry, this);
 
 	std::unique_lock<std::mutex> lock(stopMutex);
-	stopCondition.wait(lock, [this] { return !stopThreads; });
+	stopCondition.wait(lock, [this] { return stopThreads.load(); });
 }
 
 void OilChecker::OilMeasurementThreadEntry()
