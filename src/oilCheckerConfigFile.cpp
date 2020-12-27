@@ -29,6 +29,9 @@ void OilCheckerConfigFile::BuildConfigItems()
 
 	AddConfigItem(_T("OATH2_CLIENT_ID"), config.email.oAuth2ClientID);
 	AddConfigItem(_T("OATH2_CLIENT_SECRET"), config.email.oAuth2ClientSecret);
+	
+	AddConfigItem(_T("PING_TRIGGER_PIN"), config.ping.triggerPin);
+	AddConfigItem(_T("PING_ECHO_PIN"), config.ping.echoPin);
 }
 
 void OilCheckerConfigFile::AssignDefaults()
@@ -91,6 +94,18 @@ bool OilCheckerConfigFile::ConfigIsOK()
 	if (config.email.recipients.empty())
 	{
 		outStream << "At least one " << GetKey(config.email.recipients) << " must be specified" << std::endl;
+		ok = false;
+	}
+	
+	if (config.ping.triggerPin < 0)
+	{
+		outStream << GetKey(config.ping.triggerPin) << " must be specified" << std::endl;
+		ok = false;
+	}
+	
+	if (config.ping.echoPin < 0)
+	{
+		outStream << GetKey(config.ping.echoPin) << " must be specified" << std::endl;
 		ok = false;
 	}
 

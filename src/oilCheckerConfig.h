@@ -28,6 +28,12 @@ struct EmailConfig
 	std::string caCertificatePath;
 };
 
+struct PingConfig
+{
+	int triggerPin = -1;
+	int echoPin = -1;
+};
+
 struct OilCheckerConfig
 {
 	double lowLevelThreshold = -1.0;// [gal]
@@ -40,6 +46,8 @@ struct OilCheckerConfig
 	unsigned int logFileRestartPeriod = 365;// [days]
 
 	EmailConfig email;
+	
+	PingConfig ping;
 };
 
 #endif// OIL_CHECKER_CONFIG_H_

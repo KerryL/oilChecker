@@ -5,7 +5,9 @@
 
 // Local headers
 #include "oilChecker.h"
+#include "tankGeometry.h"
 #include "rpi/ds18b20Sensor.h"
+#include "rpi/pingSensor.h"
 #include "email/oAuth2Interface.h"
 
 // Standard C++ headers
@@ -161,8 +163,17 @@ void OilChecker::SummaryUpdateThreadEntry()
 bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 {
 	log << "Reading distance sensor" << std::endl;
-	values.volume = 20.0;
-	// TODO
+	
+	PingSensor ping(config.ping.triggerPin, config.ping.echoPin);
+	double distance;
+	if (!ping.GetDistance(distance))
+		return false;
+		
+	values.distance = distance / 2.54;// [in]
+		
+	VerticalTankGeometry tank(config.tankDimensions);
+	values.volume = tank.ComputeRemainingVolume(values.distance);
+	
 	return true;
 }
 
