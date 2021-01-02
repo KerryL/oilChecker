@@ -13,11 +13,15 @@
 // Standard C++ headers
 #include <filesystem>
 #include <iomanip>
+#include <numeric>
 
 const std::string OilChecker::oilLogFileName("oilHistory.csv");
 const std::string OilChecker::temperatureLogFileName("temperatureHistory.csv");
 const std::string OilChecker::oilLogCreatedDateFileName(".oilLogCreatedDate");
 const std::string OilChecker::temperatureLogCreatedDateFileName(".temperatureLogCreatedDate");
+
+const unsigned int OilChecker::distanceMeasurementsToAverage(10);
+const unsigned int OilChecker::maxDistanceMeasurementsBeforeError(20);
 
 OilChecker::~OilChecker()
 {
@@ -165,14 +169,27 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 	log << "Reading distance sensor" << std::endl;
 	
 	PingSensor ping(config.ping.triggerPin, config.ping.echoPin);
-	double distance;
-	if (!ping.GetDistance(distance))
-		return false;
-		
-	values.distance = distance / 2.54;// [in]
+	std::vector<double> toAverage;
+	unsigned int attempts(0);
+	while (toAverage.size() < distanceMeasurementsToAverage)
+	{
+		double distance;
+		if (ping.GetDistance(distance))
+			toAverage.push_back(distance);
+		else if (attempts == maxDistanceMeasurementsBeforeError)
+			return false;
+		++attempts;
+	}
+	
+	log << "Averaging " << distanceMeasurementsToAverage << " successful measurements (made " << attempts << " attempts)" << std::endl;
+	// TODO:  Standard deviation?  Min/max?  Warning if std dev is large?
+
+	values.distance = std::accumulate(toAverage.begin(), toAverage.end(), 0.0) / distanceMeasurementsToAverage / 2.54;// [in]
 		
 	VerticalTankGeometry tank(config.tankDimensions);
 	values.volume = tank.ComputeRemainingVolume(values.distance);
+	
+	log << "Measured distance of " << values.distance << " in (" << values.volume << " gal)" << std::endl;
 	
 	return true;
 }

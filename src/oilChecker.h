@@ -32,6 +32,9 @@ private:
 	static const std::string oilLogCreatedDateFileName;
 	static const std::string temperatureLogCreatedDateFileName;
 	
+	static const unsigned int distanceMeasurementsToAverage;
+	static const unsigned int maxDistanceMeasurementsBeforeError;
+	
 	OilCheckerConfig config;
 	UString::OStream& log;
 	
