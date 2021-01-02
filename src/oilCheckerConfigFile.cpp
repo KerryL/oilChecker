@@ -14,9 +14,9 @@ void OilCheckerConfigFile::BuildConfigItems()
 {
 	AddConfigItem(_T("LOW_LEVEL_THRESHOLD"), config.lowLevelThreshold);
 
-	AddConfigItem(_T("TANK_WIDTH"), config.tankDimensions.tankWidth);
-	AddConfigItem(_T("TANK_HEIGHT"), config.tankDimensions.tankHeight);
-	AddConfigItem(_T("TANK_LENGTH"), config.tankDimensions.tankLength);
+	AddConfigItem(_T("TANK_WIDTH"), config.tankDimensions.width);
+	AddConfigItem(_T("TANK_HEIGHT"), config.tankDimensions.height);
+	AddConfigItem(_T("TANK_LENGTH"), config.tankDimensions.length);
 	AddConfigItem(_T("TANK_HEIGHT_OFFSET"), config.tankDimensions.heightOffset);
 
 	AddConfigItem(_T("TEMP_PERIOD"), config.temperatureMeasurementPeriod);
@@ -49,21 +49,21 @@ bool OilCheckerConfigFile::ConfigIsOK()
 		return false;
 	}
 
-	if (config.tankDimensions.tankHeight <= 0.0)
+	if (config.tankDimensions.height <= 0.0)
 	{
-		outStream << GetKey(config.tankDimensions.tankHeight) << " must be strictly positive" << std::endl;
+		outStream << GetKey(config.tankDimensions.height) << " must be strictly positive" << std::endl;
 		ok = false;
 	}
 
-	if (config.tankDimensions.tankWidth <= 0.0)
+	if (config.tankDimensions.width <= 0.0)
 	{
-		outStream << GetKey(config.tankDimensions.tankWidth) << " must be strictly positive" << std::endl;
+		outStream << GetKey(config.tankDimensions.width) << " must be strictly positive" << std::endl;
 		ok = false;
 	}
 
-	if (config.tankDimensions.tankLength <= 0.0)
+	if (config.tankDimensions.length <= 0.0)
 	{
-		outStream << GetKey(config.tankDimensions.tankLength) << " must be strictly positive" << std::endl;
+		outStream << GetKey(config.tankDimensions.length) << " must be strictly positive" << std::endl;
 		ok = false;
 	}
 

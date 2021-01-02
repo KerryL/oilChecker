@@ -12,9 +12,9 @@
 
 struct TankDimensions
 {
-	double tankHeight = -1.0;// [in]
-	double tankWidth = -1.0;// [in] (equal to diameter of rounded top/bottom)
-	double tankLength = -1.0;// [in]
+	double height = -1.0;// [in]
+	double width = -1.0;// [in] (equal to diameter of rounded top/bottom)
+	double length = -1.0;// [in]
 	double heightOffset = 0.0;// [in]
 };
 
