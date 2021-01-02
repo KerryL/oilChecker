@@ -68,6 +68,7 @@ void OilChecker::OilMeasurementThreadEntry()
 			if (!GetRemainingOilVolume(values))
 			{
 				log << "Failed to get remaining oil volume" << std::endl;
+				// TODO:  Send email?
 				stopThreads = true;
 				stopCondition.notify_all();
 				break;
@@ -116,6 +117,7 @@ void OilChecker::TemperatureMeasurementThreadEntry()
 				log << "Failed to get temperature" << std::endl;
 				stopThreads = true;
 				stopCondition.notify_all();
+				// TODO:  Send email?  Or just send email any time we stop running?
 				break;
 			}
 

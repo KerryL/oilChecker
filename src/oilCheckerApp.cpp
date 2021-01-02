@@ -57,6 +57,8 @@ void OilCheckerApp::PrintUsage(const std::string& calledAs)
 
 bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStream& log)
 {
+	log << "Setting up OAuth2" << std::endl;
+	
 	OAuth2Interface::Get().SetClientID(email.oAuth2ClientID);
 	OAuth2Interface::Get().SetClientSecret(email.oAuth2ClientSecret);
 	OAuth2Interface::Get().SetVerboseOutput(false);
