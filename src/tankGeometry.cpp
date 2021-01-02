@@ -20,7 +20,7 @@ double VerticalTankGeometry::ComputeRemainingVolume(const double& measuredDistan
 	{
 		areaSqInch = halfCircleArea;// Bottom half circle
 		areaSqInch += dimensions.width * (dimensions.height - dimensions.width);// Center rectangle
-		areaSqInch += halfCircleArea - CircularSegmentArea(radius, level - dimensions.height - radius);// Portion of top half circle
+		areaSqInch += halfCircleArea - CircularSegmentArea(radius, level - dimensions.height + radius);// Portion of top half circle
 	}
 	else if (level > radius)// Level in central rectangle
 	{
