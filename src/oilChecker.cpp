@@ -68,7 +68,6 @@ void OilChecker::OilMeasurementThreadEntry()
 			if (!GetRemainingOilVolume(values))
 			{
 				log << "Failed to get remaining oil volume" << std::endl;
-				// TODO:  Send email?
 				stopThreads = true;
 				stopCondition.notify_all();
 				break;
@@ -117,7 +116,6 @@ void OilChecker::TemperatureMeasurementThreadEntry()
 				log << "Failed to get temperature" << std::endl;
 				stopThreads = true;
 				stopCondition.notify_all();
-				// TODO:  Send email?  Or just send email any time we stop running?
 				break;
 			}
 
@@ -157,7 +155,7 @@ void OilChecker::SummaryUpdateThreadEntry()
 		{
 			std::unique_lock<std::mutex> lock(activityMutex);
 
-			if (!SendSummaryEmail())
+			if (!SendSummaryEmail(stopThreads))
 				log << "Failed to send summary email" << std::endl;
 
 			temperatureData.clear();
@@ -222,8 +220,11 @@ bool OilChecker::GetTemperature(double& temperature) const
 	return true;
 }
 
-bool OilChecker::SendSummaryEmail() const
+bool OilChecker::SendSummaryEmail(const bool& stopFlag) const
 {
+	if (stopFlag)
+		log << "Summary email triggered due to stop flag" << std::endl;
+
 	log << "Sending summary email" << std::endl;
 	UString::OStringStream ss;
 	ss << "Summary for oil level and outside temperature for the last " << config.summaryEmailPeriod << " days:\n\n"
@@ -251,6 +252,9 @@ bool OilChecker::SendSummaryEmail() const
 		}
 	}
 	
+	if (stopFlag)
+		ss << "\n\nThis email was triggered because the oilChecker applications has stopped!\nCheck the log file for details.\n";
+	
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
@@ -272,7 +276,7 @@ bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
-	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, false, log);
+	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, true, log);
 	if (!sender.Send())
 		return false;
 

@@ -1,7 +1,7 @@
 Readme for OilChecker application
 Copyright 2020 Kerry Loux
 
-See LICENSE file for licesne details.
+See LICENSE file for license details.
 
 To build on clean install of Raspian Buster:
 
@@ -47,3 +47,13 @@ To build on clean install of Raspian Buster:
 5. Configure the system to run the application on startup:
 TODO
   $
+
+A note on the email implementation:
+This application is designed to send email by interfacing to Google's Gmail API and supports OAuth2 for authorization.  To make this work, you need to:
+- Visit https://console.developers.google.com/
+- Set up a project
+- Enable the Gmail API for your project (/auth/gmail.compose)
+- Create "OAuth Client ID" credentials for a "TV and Limited Input" type device
+- Add your Client ID and Client Secret for your new credentials to the oilChecker config file (using the OATH2_CLIENT_ID and OATH2_CLIENT_SECRET fields)
+
+When you first create your project, the application will be unpublished, which means that credentials will be for "Test Users" and will expire every 7 days.

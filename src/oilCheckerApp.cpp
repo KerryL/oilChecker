@@ -59,6 +59,8 @@ bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStr
 {
 	log << "Setting up OAuth2" << std::endl;
 	
+	OAuth2Interface::Get().SetLoggingTarget(log);
+	
 	OAuth2Interface::Get().SetClientID(email.oAuth2ClientID);
 	OAuth2Interface::Get().SetClientSecret(email.oAuth2ClientSecret);
 	OAuth2Interface::Get().SetVerboseOutput(false);
@@ -74,7 +76,7 @@ bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStr
 	OAuth2Interface::Get().SetRedirectURI(_T("urn:ietf:wg:oauth:2.0:oob"));
 	OAuth2Interface::Get().SetLoginHint(email.sender);
 	OAuth2Interface::Get().SetGrantType(_T("authorization_code"));
-	OAuth2Interface::Get().SetScope(_T("https://www.googleapis.com/auth/gmail.send");
+	OAuth2Interface::Get().SetScope(_T("https://www.googleapis.com/auth/gmail.send"));
 #else
 	OAuth2Interface::Get().SetTokenURL(_T("https://www.googleapis.com/oauth2/v3/token"));
 	OAuth2Interface::Get().SetAuthenticationURL(_T("https://accounts.google.com/o/oauth2/device/code"));

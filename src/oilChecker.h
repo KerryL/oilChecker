@@ -66,7 +66,7 @@ private:
 
 	bool GetRemainingOilVolume(VolumeDistance& values) const;
 	bool GetTemperature(double& temperature) const;
-	bool SendSummaryEmail() const;
+	bool SendSummaryEmail(const bool& stopFlag) const;
 	bool SendLowOilLevelEmail(const double& volumeRemaining) const;
 	bool SendNewLogFileEmail(const std::string& oldLogFileName) const;
 
