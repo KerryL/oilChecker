@@ -48,12 +48,6 @@ To build on clean install of Raspian Buster:
 TODO
   $
 
-A note on the email implementation:
-This application is designed to send email by interfacing to Google's Gmail API and supports OAuth2 for authorization.  To make this work, you need to:
-- Visit https://console.developers.google.com/
-- Set up a project
-- Enable the Gmail API for your project ("https://mail.google.com/" -- We really only need "/auth/gmail.compose" but that only works with REST API and we're currently using SMTP)
-- Create "OAuth Client ID" credentials (can't use "TV and Limited Input" type device because the scope we need won't work with these devices)
-- Add your Client ID and Client Secret for your new credentials to the oilChecker config file (using the OATH2_CLIENT_ID and OATH2_CLIENT_SECRET fields)
+See notes in email subrepo's readme file about how to obtain the Client ID and Client Secret and how to enable APIs for your Google account.
 
 When you first create your project, the application will be unpublished, which means that credentials will be for "Test Users" and will expire every 7 days.
