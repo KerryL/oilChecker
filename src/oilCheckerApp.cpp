@@ -69,7 +69,7 @@ bool OilCheckerApp::SetupOAuth2Interface(const EmailConfig& email, UString::OStr
 
 	// Originally, this was for windows only, but device access does not
 	// support full access to e-mail.  So the user has some typing to do...
-#if 0//#ifdef _WIN32
+#if 1//#ifdef _WIN32
 	OAuth2Interface::Get().SetTokenURL(_T("https://accounts.google.com/o/oauth2/token"));
 	OAuth2Interface::Get().SetAuthenticationURL(_T("https://accounts.google.com/o/oauth2/auth"));
 	OAuth2Interface::Get().SetResponseType(_T("code"));
