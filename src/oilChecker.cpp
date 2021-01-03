@@ -276,7 +276,7 @@ bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
-	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, true, log);
+	EmailSender sender("Low Oil Level Detected", ss.str(), std::string(), recipients, loginInfo, false, false, log);
 	if (!sender.Send())
 		return false;
 
