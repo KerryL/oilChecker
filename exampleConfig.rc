@@ -1,0 +1,32 @@
+
+# Tank dimensions in inches
+TANK_WIDTH 27
+TANK_HEIGHT 44
+TANK_LENGTH 59
+TANK_HEIGHT_OFFSET 6
+
+# Email is sent to recipients when level is less than this threshold
+LOW_LEVEL_THRESHOLD 30 # gal
+
+# Periods at which temperature and oil level are measured and logged
+TEMP_PERIOD 30 # min
+OIL_PERIOD 240 # min
+
+# Period at which summary email is sent to recipients
+SUMMARY_PERIOD 5 # days
+
+# Period at which log files are emailed to recipients and started fresh
+NEW_LOG_PERIOD 365 # days
+
+# Ping sensor configuration
+PING_TRIGGER_PIN 0
+PING_ECHO_PIN 9
+
+# DS18B20 temperature sensor uses the default pin
+
+# Email configuration (multiple recipients can be listed)
+EMAIL_SENDER sender@domain.com
+EMAIL recipient@domain.com
+
+OATH2_CLIENT_ID <client ID here>
+OATH2_CLIENT_SECRET <client secret here>
