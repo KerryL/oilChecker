@@ -6,7 +6,7 @@ TANK_LENGTH 59
 TANK_HEIGHT_OFFSET 6
 
 # Email is sent to recipients when level is less than this threshold
-LOW_LEVEL_THRESHOLD 30 # gal
+LOW_LEVEL_THRESHOLD 60 # gal
 
 # Periods at which temperature and oil level are measured and logged
 TEMP_PERIOD 30 # min

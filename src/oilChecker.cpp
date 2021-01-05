@@ -155,7 +155,7 @@ void OilChecker::SummaryUpdateThreadEntry()
 		{
 			std::unique_lock<std::mutex> lock(activityMutex);
 
-			if (!SendSummaryEmail(stopThreads))
+			if (!SendSummaryEmail())
 				log << "Failed to send summary email" << std::endl;
 
 			temperatureData.clear();
@@ -220,9 +220,9 @@ bool OilChecker::GetTemperature(double& temperature) const
 	return true;
 }
 
-bool OilChecker::SendSummaryEmail(const bool& stopFlag) const
+bool OilChecker::SendSummaryEmail() const
 {
-	if (stopFlag)
+	if (stopThreads)
 		log << "Summary email triggered due to stop flag" << std::endl;
 
 	log << "Sending summary email" << std::endl;
@@ -252,7 +252,7 @@ bool OilChecker::SendSummaryEmail(const bool& stopFlag) const
 		}
 	}
 	
-	if (stopFlag)
+	if (stopThreads)
 		ss << "\n\nThis email was triggered because the oilChecker applications has stopped!\nCheck the log file for details.\n";
 	
 	EmailSender::LoginInfo loginInfo;

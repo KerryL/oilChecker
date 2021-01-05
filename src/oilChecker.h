@@ -52,8 +52,6 @@ private:
 
 	void SignalStop();
 
-	// TODO:  Stop check duration so we don't wait days to quit in the event of an error (or can we use conditional event based on two conditions?)
-
 	void OilMeasurementThreadEntry();
 	void TemperatureMeasurementThreadEntry();
 	void SummaryUpdateThreadEntry();
@@ -66,7 +64,7 @@ private:
 
 	bool GetRemainingOilVolume(VolumeDistance& values) const;
 	bool GetTemperature(double& temperature) const;
-	bool SendSummaryEmail(const bool& stopFlag) const;
+	bool SendSummaryEmail() const;
 	bool SendLowOilLevelEmail(const double& volumeRemaining) const;
 	bool SendNewLogFileEmail(const std::string& oldLogFileName) const;
 
