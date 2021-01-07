@@ -227,33 +227,34 @@ bool OilChecker::SendSummaryEmail() const
 
 	log << "Sending summary email" << std::endl;
 	UString::OStringStream ss;
-	ss << "Summary for oil level and outside temperature for the last " << config.summaryEmailPeriod << " days:\n\n"
-		<< "Date/Time         Temperature (deg F)  Remaining Oil (gal)\n";
-	// Column widths are 16, 19, and 19 with two spaces between each column
+	ss << "<p>Summary for oil level and outside temperature:</p>\n<table>\n"
+		<< "<tr><th>Date/Time</th><th>Remaining Oil (gal)</th><th>Temperature (deg F)</th></tr>";
 		
 	unsigned int oilI(0), tempI(0);
 	while (oilI < oilData.size() || tempI < temperatureData.size())
 	{
 		if (oilI >= oilData.size() || temperatureData[tempI].t < oilData[oilI].t)
 		{
-			ss << GetTimestamp(temperatureData[tempI].t) <<std::string(19 + 2 + 2, ' ') << std::setfill(' ') << std::setw(19) << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << '\n';
+			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td>" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
 			++tempI;
 		}
 		else if (tempI >= temperatureData.size() || oilData[oilI].t < temperatureData[tempI].t)
 		{
-			ss << GetTimestamp(oilData[oilI].t) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(oilData[oilI].v.volume + 0.5) << '\n';
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td>" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>";
 			++oilI;
 		}
 		else
 		{
-			ss << GetTimestamp(oilData[oilI].t) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(oilData[oilI].v.volume + 0.5) << "  " << std::setfill(' ') << std::setw(19) << static_cast<int>(temperatureData[tempI].v + 0.5) << '\n';
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td>" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td>" << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
 			++oilI;
 			++tempI;
 		}
 	}
 	
+	ss << "</table>";
+	
 	if (stopThreads)
-		ss << "\n\nThis email was triggered because the oilChecker applications has stopped!\nCheck the log file for details.\n";
+		ss << "<p>This email was triggered because the oilChecker applications has stopped!  Check the log file for details.</p>";
 	
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
