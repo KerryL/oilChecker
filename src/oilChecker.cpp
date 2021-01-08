@@ -193,8 +193,8 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 	ComputeAverageAndStdDev(measurements, values.distance, stdDev);
 	log << "Averaging " << distanceMeasurementsToAverage << " successful measurements (made " << attempts << " attempts)" << std::endl;
 	log << "Measurement statistics:\n"
-		<< "  Min.      = "<< *std::min_element(measurements.begin(), measurements.end()) << " in\n"
-		<< "  Max.      = "<< *std::max_element(measurements.begin(), measurements.end()) << " in\n"
+		<< "  Min.      = "<< *std::min_element(measurements.begin(), measurements.end()) / 2.54 << " in\n"
+		<< "  Max.      = "<< *std::max_element(measurements.begin(), measurements.end()) / 2.54 << " in\n"
 		<< "  Std. dev. = "<< stdDev << " in" << std::endl;
 
 	VerticalTankGeometry tank(config.tankDimensions);
