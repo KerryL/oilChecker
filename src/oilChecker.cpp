@@ -294,7 +294,7 @@ bool OilChecker::SendNewLogFileEmail(const std::string& oldLogFileName) const
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
 	BuildEmailEssentials(loginInfo, recipients);
-	EmailSender sender("Log File Reached Maximum Duration", ss.str(), oldLogFileName, recipients, loginInfo, true, false, log);
+	EmailSender sender("Log File Reached Maximum Duration", ss.str(), oldLogFileName, recipients, loginInfo, false, false, log);
 	if (!sender.Send())
 		return false;
 
