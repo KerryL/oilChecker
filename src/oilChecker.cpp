@@ -67,20 +67,20 @@ void OilChecker::OilMeasurementThreadEntry()
 			VolumeDistance values;
 			if (!GetRemainingOilVolume(values))
 			{
-				log << "Failed to get remaining oil volume" << std::endl;
+				log << "ERROR:  Failed to get remaining oil volume" << std::endl;
 				stopThreads = true;
 				stopCondition.notify_all();
 				break;
 			}
 
 			if (!WriteOilLogData(values))
-				log << "Failed to log oil data (v = " << values.volume << " gal, d = " << values.distance << " in)" << std::endl;
+				log << "Warning:  Failed to log oil data (v = " << values.volume << " gal, d = " << values.distance << " in)" << std::endl;
 
 			if (values.volume < config.lowLevelThreshold)
 			{
 				log << "Low oil level detected!" << std::endl;
 				if (!SendLowOilLevelEmail(values.volume))
-					log << "Failed to send low oil warning email" << std::endl;
+					log << "Warning:  Failed to send low oil warning email" << std::endl;
 			}
 
 			oilData.push_back(OilDataPoint(std::chrono::system_clock::now(), values));
@@ -113,14 +113,14 @@ void OilChecker::TemperatureMeasurementThreadEntry()
 			double temperature;
 			if (!GetTemperature(temperature))
 			{
-				log << "Failed to get temperature" << std::endl;
+				log << "ERROR:  Failed to get temperature" << std::endl;
 				stopThreads = true;
 				stopCondition.notify_all();
 				break;
 			}
 
 			if (!WriteTemperatureLogData(temperature))
-				log << "Failed to log temperature data (T = " << temperature << " deg F)" << std::endl;
+				log << "Warning:  Failed to log temperature data (T = " << temperature << " deg F)" << std::endl;
 
 			temperatureData.push_back(TemperatureDataPoint(std::chrono::system_clock::now(), temperature));
 
@@ -156,7 +156,7 @@ void OilChecker::SummaryUpdateThreadEntry()
 			std::unique_lock<std::mutex> lock(activityMutex);
 
 			if (!SendSummaryEmail())
-				log << "Failed to send summary email" << std::endl;
+				log << "Warning:  Failed to send summary email" << std::endl;
 
 			temperatureData.clear();
 			oilData.clear();
@@ -235,17 +235,17 @@ bool OilChecker::SendSummaryEmail() const
 	{
 		if (oilI >= oilData.size() || temperatureData[tempI].t < oilData[oilI].t)
 		{
-			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td>" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
+			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td align=\"center\">" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
 			++tempI;
 		}
 		else if (tempI >= temperatureData.size() || oilData[oilI].t < temperatureData[tempI].t)
 		{
-			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td>" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>";
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>";
 			++oilI;
 		}
 		else
 		{
-			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td>" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td>" << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td align=\"center\">" << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
 			++oilI;
 			++tempI;
 		}
