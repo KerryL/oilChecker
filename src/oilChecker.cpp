@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <numeric>
+#include <cmath>
 
 const std::string OilChecker::oilLogFileName("oilHistory.csv");
 const std::string OilChecker::temperatureLogFileName("temperatureHistory.csv");
@@ -169,23 +170,33 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 	log << "Reading distance sensor" << std::endl;
 	
 	PingSensor ping(config.ping.triggerPin, config.ping.echoPin);
-	std::vector<double> toAverage;
+	std::vector<double> measurements;
 	unsigned int attempts(0);
-	while (toAverage.size() < distanceMeasurementsToAverage)
+	while (measurements.size() < distanceMeasurementsToAverage)
 	{
 		double distance;
-		if (ping.GetDistance(distance))
-			toAverage.push_back(distance);
-		else if (attempts == maxDistanceMeasurementsBeforeError)
+		const double minValidDistance(config.tankDimensions.heightOffset);
+		const double maxValidDistance(config.tankDimensions.heightOffset + config.tankDimensions.height);
+		if (attempts == maxDistanceMeasurementsBeforeError)
 			return false;
+		else if (ping.GetDistance(distance))
+		{
+			if (distance < minValidDistance || distance > maxValidDistance)
+				log << "Rejecting measurement of " << distance << " in because it is outside of expected range for valid measurements (" << minValidDistance << " to " << maxValidDistance << ")" << std::endl;
+			else
+				measurements.push_back(distance);
+		}
 		++attempts;
 	}
 	
+	double stdDev;
+	ComputeAverageAndStdDev(measurements, values.distance, stdDev);
 	log << "Averaging " << distanceMeasurementsToAverage << " successful measurements (made " << attempts << " attempts)" << std::endl;
-	// TODO:  Standard deviation?  Min/max?  Warning if std dev is large?
+	log << "Measurement statistics:\n"
+		<< "  Min.      = "<< *std::min_element(measurements.begin(), measurements.end()) << " in\n"
+		<< "  Max.      = "<< *std::max_element(measurements.begin(), measurements.end()) << " in\n"
+		<< "  Std. dev. = "<< stdDev << " in" << std::endl;
 
-	values.distance = std::accumulate(toAverage.begin(), toAverage.end(), 0.0) / distanceMeasurementsToAverage / 2.54;// [in]
-		
 	VerticalTankGeometry tank(config.tankDimensions);
 	values.volume = tank.ComputeRemainingVolume(values.distance);
 	
@@ -228,24 +239,24 @@ bool OilChecker::SendSummaryEmail() const
 	log << "Sending summary email" << std::endl;
 	UString::OStringStream ss;
 	ss << "<p>Summary for oil level and outside temperature:</p>\n<table>\n"
-		<< "<tr><th>Date/Time</th><th>Remaining Oil (gal)</th><th>Temperature (deg F)</th></tr>";
+		<< "<tr><th>Date/Time</th><th>Remaining Oil (gal)</th><th>Temperature (deg F)</th></tr>\n";
 		
 	unsigned int oilI(0), tempI(0);
 	while (oilI < oilData.size() || tempI < temperatureData.size())
 	{
 		if (oilI >= oilData.size() || temperatureData[tempI].t < oilData[oilI].t)
 		{
-			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td align=\"center\">" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
+			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td align=3D\"center\">" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>\n";
 			++tempI;
 		}
 		else if (tempI >= temperatureData.size() || oilData[oilI].t < temperatureData[tempI].t)
 		{
-			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>";
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=3D\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>\n";
 			++oilI;
 		}
 		else
 		{
-			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td align=\"center\">" << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>";
+			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=3D\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td align=3D\"center\">" << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>\n";
 			++oilI;
 			++tempI;
 		}
@@ -406,4 +417,14 @@ bool OilChecker::WriteLogCreatedDate(const std::string& fileName, UString::OStre
 	
 	file << GetTimestamp();
 	return true;
+}
+
+void OilChecker::ComputeAverageAndStdDev(const std::vector<double>& values, double& average, double& stdDev)
+{
+	average = std::accumulate(values.begin(), values.end(), 0.0) / values.size() / 2.54;// [in]
+	double sumSqResiduals(0.0);
+	for (const auto& v : values)
+		sumSqResiduals += (v / 2.54 - average) * (v / 2.54 - average);
+
+	stdDev = sqrt(sumSqResiduals / values.size());
 }

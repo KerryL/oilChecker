@@ -93,6 +93,8 @@ private:
 	static std::string GetTimestamp(const std::chrono::system_clock::time_point& now);
 	static std::chrono::system_clock::time_point ReadLogCreatedDate(const std::string& fileName, UString::OStream& log);
 	static bool WriteLogCreatedDate(const std::string& fileName, UString::OStream& log);
+	
+	static void ComputeAverageAndStdDev(const std::vector<double>& values, double& average, double& stdDev);
 };
 
 #endif// OIL_CHECKER_H_
