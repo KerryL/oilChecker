@@ -265,7 +265,7 @@ bool OilChecker::SendSummaryEmail() const
 	ss << "</table>";
 	
 	if (stopThreads)
-		ss << "<p>This email was triggered because the oilChecker applications has stopped!  Check the log file for details.</p>";
+		ss << "<p>This email was sent because the oilChecker application has stopped!  Check the log file for details.</p>";
 	
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;
