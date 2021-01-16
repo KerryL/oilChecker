@@ -64,7 +64,7 @@ dtoverlay=w1-gpio
 ````
   If prompted, choose your preferred text editor.  Then add the following line to the bottom of the cron table:
 ````
-  @reboot <full path to oilChecker/run.sh>
+  @reboot <full path to oilChecker/run.sh> &
 ````
 
 ## Notes
