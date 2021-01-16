@@ -59,8 +59,13 @@ dtoverlay=w1-gpio
 ````
 
 5. Configure the system to run the application on startup:
-TODO
-  $
+````
+  $ crontab -e
+````
+  If prompted, choose your preferred text editor.  Then add the following line to the bottom of the cron table:
+````
+  @reboot <full path to oilChecker/run.sh>
+````
 
 ## Notes
 I encountered a bizzare issue with DNS failing some time after the Raspberry Pi booted.  I tried many fixes, but nothing seemed to work until I found this:  https://www.raspberrypi.org/forums/viewtopic.php?t=273602.  The solution described on this page worked for me (this post:  https://www.raspberrypi.org/forums/viewtopic.php?t=273602#p1659223).
