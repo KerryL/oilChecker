@@ -95,6 +95,8 @@ private:
 	static bool WriteLogCreatedDate(const std::string& fileName, UString::OStream& log);
 	
 	static void ComputeAverageAndStdDev(const std::vector<double>& values, double& average, double& stdDev);
+	
+	static bool WithinDuration(const std::chrono::system_clock::time_point& a, const std::chrono::system_clock::time_point& b, const std::chrono::system_clock::duration& d);
 };
 
 #endif// OIL_CHECKER_H_

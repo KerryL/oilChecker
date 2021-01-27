@@ -244,12 +244,13 @@ bool OilChecker::SendSummaryEmail() const
 	unsigned int oilI(0), tempI(0);
 	while (oilI < oilData.size() || tempI < temperatureData.size())
 	{
-		if (oilI >= oilData.size() || temperatureData[tempI].t < oilData[oilI].t)
+		const auto nearDuration(std::chrono::minutes(1));
+		if (oilI >= oilData.size() || (temperatureData[tempI].t < oilData[oilI].t && !WithinDuration(temperatureData[tempI].t, oilData[oilI].t, nearDuration)))
 		{
 			ss << "<tr><td>" << GetTimestamp(temperatureData[tempI].t) << "</td><td></td><td align=3D\"center\">" << std::fixed << static_cast<int>(temperatureData[tempI].v + 0.5) << "</td></tr>\n";
 			++tempI;
 		}
-		else if (tempI >= temperatureData.size() || oilData[oilI].t < temperatureData[tempI].t)
+		else if (tempI >= temperatureData.size() || (oilData[oilI].t < temperatureData[tempI].t && !WithinDuration(temperatureData[tempI].t, oilData[oilI].t, nearDuration)))
 		{
 			ss << "<tr><td>" << GetTimestamp(oilData[oilI].t) << "</td><td align=3D\"center\">" << static_cast<int>(oilData[oilI].v.volume + 0.5) << "</td><td></td></tr>\n";
 			++oilI;
@@ -427,4 +428,9 @@ void OilChecker::ComputeAverageAndStdDev(const std::vector<double>& values, doub
 		sumSqResiduals += (v / 2.54 - average) * (v / 2.54 - average);
 
 	stdDev = sqrt(sumSqResiduals / values.size());
+}
+
+bool OilChecker::WithinDuration(const std::chrono::system_clock::time_point& a, const std::chrono::system_clock::time_point& b, const std::chrono::system_clock::duration& d)
+{
+	return std::chrono::abs(a - b) < d;
 }
