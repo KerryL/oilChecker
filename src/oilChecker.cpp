@@ -95,6 +95,8 @@ void OilChecker::OilMeasurementThreadEntry()
 				oilLogCreatedDate = ReadLogCreatedDate(oilLogCreatedDateFileName, log);
 			}
 		}
+		
+		// TODO:  Estimate days until empty
 
 		std::unique_lock<std::mutex> lock(stopMutex);
 		stopCondition.wait_until(lock, wakeTime);
@@ -173,7 +175,7 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 	std::vector<double> measurements;
 	unsigned int attempts(0);
 	while (measurements.size() < distanceMeasurementsToAverage)
-	{
+	{		
 		double distance;
 		const double minValidDistance(config.tankDimensions.heightOffset);
 		const double maxValidDistance(config.tankDimensions.heightOffset + config.tankDimensions.height);
@@ -187,6 +189,9 @@ bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
 				measurements.push_back(distance);
 		}
 		++attempts;
+		
+		if (measurements.size() < distanceMeasurementsToAverage)
+			std::this_thread::sleep_for(std::chrono::milliseconds(config.ping.minTimeBetweenPings));
 	}
 	
 	double stdDev;

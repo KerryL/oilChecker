@@ -21,6 +21,7 @@ NEW_LOG_PERIOD 365 # days
 # Ping sensor configuration
 PING_TRIGGER_PIN 0
 PING_ECHO_PIN 9
+MIN_TIME_BETWEEN_PINGS 10000 # ms
 
 # DS18B20 temperature sensor uses the default pin
 

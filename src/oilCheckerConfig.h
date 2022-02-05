@@ -32,6 +32,7 @@ struct PingConfig
 {
 	int triggerPin = -1;
 	int echoPin = -1;
+	unsigned int minTimeBetweenPings = 10000;// [ms]
 };
 
 struct OilCheckerConfig
