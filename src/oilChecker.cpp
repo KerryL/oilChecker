@@ -10,6 +10,9 @@
 #include "rpi/pingSensor.h"
 #include "email/oAuth2Interface.h"
 
+// Eigen headers
+#include <Eigen/Eigen>
+
 // Standard C++ headers
 #include <filesystem>
 #include <iomanip>
@@ -39,6 +42,8 @@ OilChecker::~OilChecker()
 
 void OilChecker::Run()
 {
+	// TODO:  Do we need to read the oil log file to populate oilData?
+	
 	if (!std::filesystem::exists(oilLogCreatedDateFileName))
 		WriteLogCreatedDate(oilLogCreatedDateFileName, log);
 	if (!std::filesystem::exists(temperatureLogCreatedDateFileName))
@@ -76,11 +81,13 @@ void OilChecker::OilMeasurementThreadEntry()
 
 			if (!WriteOilLogData(values))
 				log << "Warning:  Failed to log oil data (v = " << values.volume << " gal, d = " << values.distance << " in)" << std::endl;
+				
+			const double daysToEmpty(EstimateDaysToEmpty());
 
-			if (values.volume < config.lowLevelThreshold)
+			if (values.volume < config.lowLevelThreshold || daysToEmpty < config.daysToEmptyWarning)
 			{
 				log << "Low oil level detected!" << std::endl;
-				if (!SendLowOilLevelEmail(values.volume))
+				if (!SendLowOilLevelEmail(values.volume, daysToEmpty))
 					log << "Warning:  Failed to send low oil warning email" << std::endl;
 			}
 
@@ -95,8 +102,6 @@ void OilChecker::OilMeasurementThreadEntry()
 				oilLogCreatedDate = ReadLogCreatedDate(oilLogCreatedDateFileName, log);
 			}
 		}
-		
-		// TODO:  Estimate days until empty
 
 		std::unique_lock<std::mutex> lock(stopMutex);
 		stopCondition.wait_until(lock, wakeTime);
@@ -165,6 +170,45 @@ void OilChecker::SummaryUpdateThreadEntry()
 			oilData.clear();
 		}	
 	}
+}
+
+double OilChecker::EstimateDaysToEmpty() const
+{
+	const double fillDetectionVolume(20.0);// [gal] if there is an increase in volume in excess of this value, assume the tank was filled an ignore all data prior to the increase
+	size_t startIndex;
+	for (startIndex = oilData.size(); startIndex > 0; --startIndex)
+	{
+		if (oilData[startIndex - 2].v.volume + fillDetectionVolume < oilData[startIndex - 1].v.volume)
+		{
+			--startIndex;
+			break;
+		}
+	}
+	
+	const size_t minDataPoints(5);
+	if (oilData.size() - startIndex < minDataPoints)
+	{
+		log << "Warning:  Not enough data to estimate days to empty" << std::endl;
+		return 2.0 * config.daysToEmptyWarning;// Larger than threshold so we won't generate warning
+	}
+	
+	// Linear model for remaining volume vs. time
+	Eigen::MatrixXd model(oilData.size() - startIndex, 2);
+	Eigen::VectorXd volume(oilData.size() - startIndex);
+	for (size_t i = startIndex; i < oilData.size(); ++i)
+	{
+		constexpr double millisecondsPerDay(24.0 * 60.0 * 60.0 * 1000.0);
+		model(i, 0) = std::chrono::duration_cast<std::chrono::milliseconds>(oilData[i].t - oilData.back().t).count() / millisecondsPerDay;// Use last entry (approximately now) as reference, so positive x values are "days from now"
+		model(i, 1) = 1.0;
+		volume(i) = oilData[i].v.volume;
+	}
+	
+	const Eigen::Vector2d coefficients(model.colPivHouseholderQr().solve(volume));
+	
+	// We now have the following model:
+	//   volume = coefficients(1) + coefficients(0) * days_from_now
+	// We can rearrange to get the number of days until volume = 0
+	return -coefficients(1) / coefficients(0);
 }
 
 bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const
@@ -284,12 +328,12 @@ bool OilChecker::SendSummaryEmail() const
 	return true;
 }
 
-bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining) const
+bool OilChecker::SendLowOilLevelEmail(const double& volumeRemaining, const double& daysToEmpty) const
 {
 	log << "Sending low-level warning email" << std::endl;
 	UString::OStringStream ss;
-	ss << "Only " << volumeRemaining << " gal of oil remains in the tank, which is less than the threshold of "
-		<< config.lowLevelThreshold << " gal.";
+	ss.precision(1);
+	ss << "Only " << volumeRemaining << " gal of oil remains in the tank.  The tank is projected to be empty in " << daysToEmpty << " days.";
 	
 	EmailSender::LoginInfo loginInfo;
 	std::vector<EmailSender::AddressInfo> recipients;

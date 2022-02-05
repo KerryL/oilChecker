@@ -65,7 +65,7 @@ private:
 	bool GetRemainingOilVolume(VolumeDistance& values) const;
 	bool GetTemperature(double& temperature) const;
 	bool SendSummaryEmail() const;
-	bool SendLowOilLevelEmail(const double& volumeRemaining) const;
+	bool SendLowOilLevelEmail(const double& volumeRemaining, const double& daysToEmpty) const;
 	bool SendNewLogFileEmail(const std::string& oldLogFileName) const;
 
 	bool WriteOilLogData(const VolumeDistance& values) const;
@@ -86,6 +86,8 @@ private:
 
 	std::vector<TemperatureDataPoint> temperatureData;
 	std::vector<OilDataPoint> oilData;
+	
+	double EstimateDaysToEmpty() const;
 
 	void BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const;
 	
