@@ -39,6 +39,7 @@ struct OilCheckerConfig
 {
 	double lowLevelThreshold = -1.0;// [gal]
 	unsigned int daysToEmptyWarning = 14;// [days]
+	unsigned int measurementCountForEstimatingEmptyDate = 60;
 
 	TankDimensions tankDimensions;
 
