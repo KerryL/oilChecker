@@ -42,7 +42,8 @@ OilChecker::~OilChecker()
 
 void OilChecker::Run()
 {
-	// TODO:  Do we need to read the oil log file to populate oilData?
+	if (!ReadOilLogData(oilDataForRateEstimate))
+		log << "Warning:  Failed to read oil log data" << std::endl;
 	
 	if (!std::filesystem::exists(oilLogCreatedDateFileName))
 		WriteLogCreatedDate(oilLogCreatedDateFileName, log);
@@ -82,6 +83,7 @@ void OilChecker::OilMeasurementThreadEntry()
 			if (!WriteOilLogData(values))
 				log << "Warning:  Failed to log oil data (v = " << values.volume << " gal, d = " << values.distance << " in)" << std::endl;
 				
+			RemoveDataBeforeRefill(oilDataForRateEstimate);
 			const double daysToEmpty(EstimateDaysToEmpty());
 
 			if (values.volume < config.lowLevelThreshold || daysToEmpty < config.daysToEmptyWarning)
@@ -91,7 +93,9 @@ void OilChecker::OilMeasurementThreadEntry()
 					log << "Warning:  Failed to send low oil warning email" << std::endl;
 			}
 
-			oilData.push_back(OilDataPoint(std::chrono::system_clock::now(), values));
+			const OilDataPoint oilDataPoint(std::chrono::system_clock::now(), values);
+			oilData.push_back(oilDataPoint);
+			oilDataForRateEstimate.push_back(oilDataPoint);
 
 			if (std::chrono::system_clock::now() > oilLogCreatedDate + std::chrono::minutes(config.logFileRestartPeriod * 24 * 60))
 			{
@@ -174,33 +178,22 @@ void OilChecker::SummaryUpdateThreadEntry()
 
 double OilChecker::EstimateDaysToEmpty() const
 {
-	const double fillDetectionVolume(20.0);// [gal] if there is an increase in volume in excess of this value, assume the tank was filled an ignore all data prior to the increase
-	size_t startIndex;
-	for (startIndex = oilData.size(); startIndex > 0; --startIndex)
-	{
-		if (oilData[startIndex - 2].v.volume + fillDetectionVolume < oilData[startIndex - 1].v.volume)
-		{
-			--startIndex;
-			break;
-		}
-	}
-	
 	const size_t minDataPoints(5);
-	if (oilData.size() - startIndex < minDataPoints)
+	if (oilDataForRateEstimate.size() < minDataPoints)
 	{
 		log << "Warning:  Not enough data to estimate days to empty" << std::endl;
 		return 2.0 * config.daysToEmptyWarning;// Larger than threshold so we won't generate warning
 	}
 	
 	// Linear model for remaining volume vs. time
-	Eigen::MatrixXd model(oilData.size() - startIndex, 2);
-	Eigen::VectorXd volume(oilData.size() - startIndex);
-	for (size_t i = startIndex; i < oilData.size(); ++i)
+	Eigen::MatrixXd model(oilDataForRateEstimate.size(), 2);
+	Eigen::VectorXd volume(oilDataForRateEstimate.size());
+	for (size_t i = 0; i < oilDataForRateEstimate.size(); ++i)
 	{
 		constexpr double millisecondsPerDay(24.0 * 60.0 * 60.0 * 1000.0);
-		model(i, 0) = std::chrono::duration_cast<std::chrono::milliseconds>(oilData[i].t - oilData.back().t).count() / millisecondsPerDay;// Use last entry (approximately now) as reference, so positive x values are "days from now"
+		model(i, 0) = std::chrono::duration_cast<std::chrono::milliseconds>(oilDataForRateEstimate[i].t - oilDataForRateEstimate.back().t).count() / millisecondsPerDay;// Use last entry (approximately now) as reference, so positive x values are "days from now"
 		model(i, 1) = 1.0;
-		volume(i) = oilData[i].v.volume;
+		volume(i) = oilDataForRateEstimate[i].v.volume;
 	}
 	
 	const Eigen::Vector2d coefficients(model.colPivHouseholderQr().solve(volume));
@@ -209,6 +202,69 @@ double OilChecker::EstimateDaysToEmpty() const
 	//   volume = coefficients(1) + coefficients(0) * days_from_now
 	// We can rearrange to get the number of days until volume = 0
 	return -coefficients(1) / coefficients(0);
+}
+
+void OilChecker::RemoveDataBeforeRefill(std::vector<OilDataPoint>& data) const
+{
+	if (data.size() > config.measurementCountForEstimatingEmptyDate)
+		data.erase(data.begin(), data.begin() + data.size() - config.measurementCountForEstimatingEmptyDate);
+
+	const double fillDetectionVolume(20.0);// [gal] if there is an increase in volume in excess of this value, assume the tank was filled an ignore all data prior to the increase
+	size_t startIndex;
+	for (startIndex = data.size(); startIndex > 0; --startIndex)
+	{
+		if (data[startIndex - 2].v.volume + fillDetectionVolume < data[startIndex - 1].v.volume)
+		{
+			--startIndex;
+			break;
+		}
+	}
+	
+	if (startIndex > 0)
+		data.erase(data.begin(), data.begin() + startIndex);
+}
+
+bool OilChecker::ReadOilLogData(std::vector<OilDataPoint>& data) const
+{
+	std::ifstream file(oilLogFileName);
+	if (!file.is_open())
+		return false;
+		
+	std::string line;
+	std::getline(file, line);// Discard header row
+	while (std::getline(file, line))
+	{
+		std::istringstream lineStream(line);
+		std::string timeToken;
+		if (!std::getline(lineStream, timeToken, ','))
+			return false;
+			
+		std::string distanceToken;
+		if (!std::getline(lineStream, distanceToken, ','))
+			return false;
+		
+		std::string volumeToken;	
+		if (!std::getline(lineStream, volumeToken, ','))
+			return false;
+			
+		std::istringstream timeSS(timeToken);
+		std::istringstream distanceSS(distanceToken);
+		std::istringstream volumeSS(volumeToken);
+		
+		OilDataPoint point;
+		std::tm tm = {};
+		if ((timeSS >> std::get_time(&tm, "%Y-%m-%d_%H:%M")).fail())
+			return false;
+		point.t = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+		if ((distanceSS >> point.v.distance).fail())
+			return false;
+		if ((volumeSS >> point.v.volume).fail())
+			return false;
+		
+		data.push_back(point);
+	}
+	
+	return true;
 }
 
 bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const

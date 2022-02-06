@@ -14,6 +14,7 @@ void OilCheckerConfigFile::BuildConfigItems()
 {
 	AddConfigItem(_T("LOW_LEVEL_THRESHOLD"), config.lowLevelThreshold);
 	AddConfigItem(_T("WARN_IF_EMPTY_WITHIN"), config.daysToEmptyWarning);
+	AddConfigItem(_T("COUNT_FOR_ESTIMATING_EMPTY"), config.measurementCountForEstimatingEmptyDate);
 
 	AddConfigItem(_T("TANK_WIDTH"), config.tankDimensions.width);
 	AddConfigItem(_T("TANK_HEIGHT"), config.tankDimensions.height);

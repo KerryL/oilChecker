@@ -86,8 +86,11 @@ private:
 
 	std::vector<TemperatureDataPoint> temperatureData;
 	std::vector<OilDataPoint> oilData;
+	std::vector<OilDataPoint> oilDataForRateEstimate;
 	
 	double EstimateDaysToEmpty() const;
+	void RemoveDataBeforeRefill(std::vector<OilDataPoint>& data) const;
+	bool ReadOilLogData(std::vector<OilDataPoint>& data) const;
 
 	void BuildEmailEssentials(EmailSender::LoginInfo& loginInfo, std::vector<EmailSender::AddressInfo>& recipients) const;
 	
