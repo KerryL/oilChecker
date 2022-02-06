@@ -83,6 +83,7 @@ void OilChecker::OilMeasurementThreadEntry()
 				log << "Warning:  Failed to log oil data (v = " << values.volume << " gal, d = " << values.distance << " in)" << std::endl;
 				
 			const double daysToEmpty(EstimateDaysToEmpty());
+			log << "Estimated days to empty:  " << daysToEmpty << std::endl;
 
 			if (values.volume < config.lowLevelThreshold || daysToEmpty < config.daysToEmptyWarning)
 			{
@@ -208,7 +209,14 @@ double OilChecker::EstimateDaysToEmpty() const
 	// We now have the following model:
 	//   volume = coefficients(1) + coefficients(0) * days_from_now
 	// We can rearrange to get the number of days until volume = 0
-	return -coefficients(1) / coefficients(0);
+	const double daysToEmpty(-coefficients(1) / coefficients(0));
+	
+	// If we're not using much oil (i.e. in the summer months), the volume will be constant, but measurement noise may mean we fit a line with a slightly positive slope.
+	// To avoid generating erroneous warnings, check for this case and fake the daysToEmpty to prevent these warnings.
+	if (daysToEmpty < 0)
+		return 2.0 * config.daysToEmptyWarning;
+
+	return daysToEmpty;
 }
 
 bool OilChecker::GetRemainingOilVolume(VolumeDistance& values) const

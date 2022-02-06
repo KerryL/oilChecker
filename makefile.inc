@@ -12,6 +12,13 @@ INCDIRS_TEMP = \
 
 INCDIRS = $(addprefix -I,$(INCDIRS_TEMP))
 
+# For 3rd party files - will be included as system files so warinings
+# are ignored.  These macros must be defined in your bashrc file.
+LIB_INCDIRS_TEMP = \
+	$(EIGEN)
+
+LIB_INCDIRS = $(addprefix -isystem,$(LIB_INCDIRS_TEMP))
+
 # Library directories that are not already on the path
 # DO NOT include the -L prefix to these paths - it will
 # be added automatically
@@ -45,7 +52,7 @@ AR = ar rcs
 RANLIB = ranlib
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -Wno-psabi -std=c++17  $(INCDIRS) `pkg-config --cflags libcurl openssl`
+CFLAGS = -Wall -Wextra -Wno-psabi $(LIB_INCDIRS) -std=c++17  $(INCDIRS) `pkg-config --cflags libcurl openssl`
 CFLAGS_RELEASE = $(CFLAGS) -O2
 CFLAGS_DEBUG = $(CFLAGS) -g
 
