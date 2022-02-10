@@ -35,6 +35,8 @@ void OilCheckerConfigFile::BuildConfigItems()
 	AddConfigItem(_T("PING_TRIGGER_PIN"), config.ping.triggerPin);
 	AddConfigItem(_T("PING_ECHO_PIN"), config.ping.echoPin);
 	AddConfigItem(_T("MIN_TIME_BETWEEN_PINGS"), config.ping.minTimeBetweenPings);
+	
+	AddConfigItem(_T("SEND_DEBUG_EMAIL"), config.sendDebugEmail);
 }
 
 void OilCheckerConfigFile::AssignDefaults()

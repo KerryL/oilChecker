@@ -67,6 +67,7 @@ private:
 	bool SendSummaryEmail() const;
 	bool SendLowOilLevelEmail(const double& volumeRemaining, const double& daysToEmpty) const;
 	bool SendNewLogFileEmail(const std::string& oldLogFileName) const;
+	bool SendDebugEmail(const std::string& title, const std::string& body) const;
 
 	bool WriteOilLogData(const VolumeDistance& values) const;
 	bool WriteTemperatureLogData(const double& temperature) const;

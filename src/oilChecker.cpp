@@ -86,6 +86,14 @@ void OilChecker::OilMeasurementThreadEntry()
 			RemoveDataBeforeRefill(oilDataForRateEstimate);
 			const double daysToEmpty(EstimateDaysToEmpty());
 			log << "Estimated days to empty:  " << daysToEmpty << std::endl;
+			
+			if (config.sendDebugEmail)
+			{
+				std::ostringstream ss;
+				ss << "Measured distance = " << values.distance << " in\nCalculated volume remaining = " << values.volume << " gal\nEstimated days to empty = " << daysToEmpty << " days";
+				if (!SendDebugEmail("Oil Level Checker Debug Message", ss.str()))
+					log << "Failed to send debug email" << std::endl;
+			}
 
 			if (values.volume < config.lowLevelThreshold || daysToEmpty < config.daysToEmptyWarning)
 			{
@@ -342,6 +350,15 @@ bool OilChecker::GetTemperature(double& temperature) const
 	log << "Measured temperature of " << temperature << " deg F" << std::endl;
 
 	return true;
+}
+
+bool OilChecker::SendDebugEmail(const std::string& title, const std::string& body) const
+{
+	EmailSender::LoginInfo loginInfo;
+	std::vector<EmailSender::AddressInfo> recipients;
+	BuildEmailEssentials(loginInfo, recipients);
+	EmailSender sender(title, body, std::string(), recipients, loginInfo, true, false, log);
+	return sender.Send();
 }
 
 bool OilChecker::SendSummaryEmail() const

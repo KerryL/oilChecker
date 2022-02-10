@@ -51,6 +51,8 @@ struct OilCheckerConfig
 	EmailConfig email;
 	
 	PingConfig ping;
+	
+	bool sendDebugEmail = false;
 };
 
 #endif// OIL_CHECKER_CONFIG_H_
